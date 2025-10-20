@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APIs - Clubes e Previsão</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            background: linear-gradient(-45deg, #0000d9, #587feb, #51eafb, #0f3460);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .page {
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* HOME PAGE */
+        .home {
+            text-align: center;
+            color: white;
+        }
+
+        .home h1 {
+            font-size: 4em;
+            margin-bottom: 15px;
+            font-weight: 800;
+            text-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            letter-spacing: -2px;
+        }
+
+        .home p {
+            font-size: 1.3em;
+            margin-bottom: 80px;
+            opacity: 0.85;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 40px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 50px 35px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3));
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+            background: rgba(255, 255, 255, 1);
+        }
+
+        .card-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+            display: inline-block;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .card h2 {
+            background: linear-gradient(135deg, #51eafb, #587feb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            font-size: 2em;
+            font-weight: 700;
+        }
+
+        .card p {
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 30px;
+            font-size: 0.95em;
+            font-weight: 400;
+        }
+
+        .card-btn {
+            background: linear-gradient(135deg, #51eafb, #587feb);
+            color: white;
+            border: none;
+            padding: 14px 40px;
+            border-radius: 30px;
+            font-size: 1em;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: rgba(51, 224, 255, 0.862) 0 10px 30px;
+        }
+
+        .card-btn:hover {
+            transform: scale(1.05);
+            box-shadow: rgba(51, 224, 255, 0.862) 0 15px 40px;
+        }
+
+        /* CONTENT PAGES */
+        .content-page {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 50px;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            border-bottom: 3px solid transparent;
+            border-image: linear-gradient(135deg, #51eafb, #587feb) 1;
+            padding-bottom: 25px;
+        }
+
+        .header h1 {
+            background: linear-gradient(135deg, #51eafb, #587feb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2.5em;
+            font-weight: 800;
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, #51eafb, #587feb);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: rgba(51, 224, 255, 0.862) 0 10px 30px;
+        }
+
+        .back-btn:hover {
+            transform: translateX(-5px);
+            box-shadow: rgba(51, 224, 255, 0.862) 0 15px 40px;
+        }
+
+        .subtitle {
+            margin-bottom: 30px;
+            color: #555;
+            font-size: 1.05em;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 40px;
+        }
+
+        input {
+            flex: 1;
+            padding: 16px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            font-size: 1em;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s;
+            background: #f8f9fa;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #51eafb;
+            background: white;
+            box-shadow: rgba(51, 224, 255, 0.862) 0 10px 30px;
+        }
+
+        input::placeholder {
+            color: #999;
+            font-weight: 300;
+        }
+
+        button {
+            padding: 16px 40px;
+            background: linear-gradient(135deg, #51eafb, #587feb);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Poppins', sans-serif;
+            box-shadow: 0 10px 30px rgba(51, 224, 255, 0.862);
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(51, 224, 255, 0.862);
+        }
+
+        button:active {
+            transform: translateY(-1px);
+        }
+
+        .results {
+            display: grid;
+            gap: 20px;
+        }
+
+        .result-box {
+            /* Estilo compartilhado para Título/Temperatura Máxima */
+            background: linear-gradient(135deg, rgba(81, 234, 251, 0.1), rgba(88, 127, 235, 0.05));
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 5px solid #51eafb;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+            text-align: left; /* Alinhar o texto no box de título */
+        }
+
+        .result-box:hover {
+            transform: translateX(5px);
+            box-shadow: 0 10px 30px rgba(51, 224, 255, 0.862);
+        }
+
+        .result-box strong {
+            color: #51eafb;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.05em;
+            font-weight: 700;
+        }
+
+        .result-box p {
+            color: #555;
+            margin: 8px 0;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .error {
+            background: linear-gradient(135deg, rgba(231, 76, 60, 0.1), rgba(231, 76, 60, 0.05));
+            color: #c0392b;
+            padding: 18px 25px;
+            border-radius: 12px;
+            border-left: 5px solid #e74c3c;
+            font-weight: 500;
+            animation: shake 0.3s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .success {
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(52, 152, 219, 0.05));
+            color: #2874a6;
+            padding: 18px 25px;
+            border-radius: 12px;
+            border-left: 5px solid #3498db;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        /* NOVOS ESTILOS COMPARTILHADOS (Clubes e Clima) */
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .info-card {
+            background: linear-gradient(135deg, #51eafb, #587feb);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(51, 224, 255, 0.862);
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .info-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(51, 224, 255, 0.862);
+        }
+
+        .info-card h3 {
+            margin-bottom: 12px;
+            font-size: 1.1em;
+            font-weight: 600;
+            opacity: 0.9;
+        }
+
+        .main-value {
+            /* Usado para Nome do time / Temperatura (Grande) */
+            font-size: 2.2em;
+            margin: 15px 0;
+            font-weight: 700;
+        }
+
+        .small-value {
+            /* Usado para Estado, Fundação / Condição, Umidade, Vento */
+            font-size: 1.3em;
+            margin: 15px 0;
+            font-weight: 600;
+        }
+        
+        .club-logo-card {
+            /* Estilo específico para o cartão do escudo */
+            padding: 10px; 
+        }
+
+        .club-logo-card img {
+            max-width: 100%;
+            max-height: 120px; /* Altura máxima para o escudo */
+            margin: 0 auto;
+            display: block;
+            object-fit: contain;
+            filter: drop-shadow(0 0 5px rgba(0,0,0,0.3));
+        }
+
+        .loading {
+            text-align: center;
+            color: #51eafb;
+            font-weight: 600;
+            padding: 30px;
+            font-size: 1.1em;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="page active home" id="home">
+            <h1>APIs</h1>
+            <p>Explore duas poderosas APIs públicas</p>
+            <div class="cards">
+                <div class="card" onclick="goToPage('clubs')">
+                    <div class="card-icon">⚽</div>
+                    <h2>Clubes do Brasil</h2>
+                    <p>Descubra informações detalhadas sobre os principais clubes de futebol do Brasil. Busque por nome e encontre dados interessantes.</p>
+                    <button class="card-btn">Explorar</button>
+                </div>
+                <div class="card" onclick="goToPage('weather')">
+                    <div class="card-icon">🌤️</div>
+                    <h2>Previsão do Tempo</h2>
+                    <p>Consulte a previsão do tempo em tempo real. Digite qualquer cidade e receba dados climáticos atualizados instantaneamente.</p>
+                    <button class="card-btn">Consultar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="page content-page" id="clubs">
+            <div class="header">
+                <h1>⚽ Clubes do Brasil</h1>
+                <button class="back-btn" onclick="goToPage('home')">← Voltar</button>
+            </div>
+            <p class="subtitle">Busque por qualquer clube de futebol do Brasil. Digite o nome para encontrar informações detalhadas.</p>
+            <div class="input-group">
+                <input type="text" id="clubInput" placeholder="Digite o nome do clube..." autocomplete="off">
+                <button onclick="buscarClubes()">Buscar</button>
+            </div>
+            <div id="clubsResults"></div>
+        </div>
+
+        <div class="page content-page" id="weather">
+            <div class="header">
+                <h1>🌤️ Previsão do Tempo</h1>
+                <button class="back-btn" onclick="goToPage('home')">← Voltar</button>
+            </div>
+            <p class="subtitle">Informe o nome da cidade para consultar a previsão do tempo completa.</p>
+            <div class="input-group">
+                <input type="text" id="weatherInput" placeholder="Digite a cidade..." autocomplete="off">
+                <button onclick="buscarTempo()">Consultar</button>
+            </div>
+            <div id="weatherResults"></div>
+        </div>
+    </div>
+
+    <script>
+        // Clubes e últimos títulos (informações atualizadas para este exemplo)
+        const clubes = {
+            'flamengo': { nome: 'Flamengo', estado: 'Rio de Janeiro', fundacao: '1895', titulo: 'Copa do Brasil 2024' },
+            'palmeiras': { nome: 'Palmeiras', estado: 'São Paulo', fundacao: '1914', titulo: 'Campeonato Brasileiro 2023' },
+            'santos': { nome: 'Santos', estado: 'São Paulo', fundacao: '1912', titulo: 'Paulistão 2016' },
+            'corinthians': { nome: 'Corinthians', estado: 'São Paulo', fundacao: '1910', titulo: 'Paulistão 2025' },
+            'botafogo': { nome: 'Botafogo', estado: 'Rio de Janeiro', fundacao: '1894', titulo: 'Campeonato Brasileiro 2024' },
+            'cruzeiro': { nome: 'Cruzeiro', estado: 'Minas Gerais', fundacao: '1921', titulo: 'Mineiro 2019' },
+            'atletico': { nome: 'Atlético Mineiro', estado: 'Minas Gerais', fundacao: '1908', titulo: 'Mineiro 2024' },
+            'saopaulo': { nome: 'São Paulo', estado: 'São Paulo', fundacao: '1930', titulo: 'Copa do Brasil 2023' },
+        };
+
+        function goToPage(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(page).classList.add('active');
+        }
+
+        function buscarClubes() {
+            const input = document.getElementById('clubInput').value.toLowerCase().trim();
+            const results = document.getElementById('clubsResults');
+
+            if (!input) {
+                results.innerHTML = '<div class="error">⚠️ Digite o nome de um clube</div>';
+                return;
+            }
+
+            const clubKey = Object.keys(clubes).find(key => clubes[key].nome.toLowerCase().includes(input) || key.includes(input));
+            const clubEncontrado = clubes[clubKey];
+
+            if (clubEncontrado) {
+                // Prepara o nome do arquivo da imagem: remove espaços e o ponto de exclamação no caso do Santos
+                let imageFileName = clubEncontrado.nome.replace(/\s/g, '').replace('daGama', 'Vasco').replace('Mineiro', 'Galo');
+                if (imageFileName === 'Santos') {
+                    imageFileName = 'Santos !'; // Para usar o nome 'Santos !.png' que você forneceu
+                }
+                
+                results.innerHTML = `
+                    <div class="success">✅ Clube encontrado!</div>
+                    <div class="info-cards">
+                        <div class="info-card">
+                            <h3>Clube</h3>
+                            <p class="main-value">${clubEncontrado.nome}</p>
+                        </div>
+                        
+                        <div class="info-card">
+                            <h3>Estado</h3>
+                            <p class="small-value">${clubEncontrado.estado}</p>
+                        </div>
+                        
+                        <div class="info-card">
+                            <h3>Fundação</h3>
+                            <p class="small-value">${clubEncontrado.fundacao}</p>
+                        </div>
+
+                        <div class="info-card club-logo-card">
+                            <h3>Escudo</h3>
+                            <img src="${imageFileName}.png" alt="${clubEncontrado.nome}">
+                        </div>
+                    </div>
+                    
+                    <div class="results" style="margin-top: 30px;">
+                        <div class="result-box">
+                            <strong>Último Grande Título</strong>
+                            <p style="font-size: 1.5em; font-weight: 600; color: #333;">${clubEncontrado.titulo}</p>
+                        </div>
+                        <div class="result-box">
+                            <strong>Apelido (Exemplo)</strong>
+                            <p>O Time Mais Amado</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                results.innerHTML = '<div class="error">❌ Clube não encontrado. Tente: Flamengo, Palmeiras, Santos, Corinthians, Botafogo, Cruzeiro, Atlético ou São Paulo</div>';
+            }
+        }
+
+        // A função buscarTempo() permanece a mesma do seu código original, mas com a atualização dos nomes das classes CSS para usar '.info-cards' e '.info-card'.
+        function buscarTempo() {
+            const cidade = document.getElementById('weatherInput').value.trim();
+            const results = document.getElementById('weatherResults');
+
+            if (!cidade) {
+                results.innerHTML = '<div class="error">⚠️ Digite o nome de uma cidade</div>';
+                return;
+            }
+
+            results.innerHTML = '<div class="loading">⏳ Buscando previsão...</div>';
+
+            fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cidade)}&language=pt&limit=1`)
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.results || data.results.length === 0) {
+                        results.innerHTML = '<div class="error">❌ Cidade não encontrada</div>';
+                        return;
+                    }
+
+                    const { latitude, longitude } = data.results[0];
+
+                    return fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code,relative_humidity_2m,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto`);
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const current = data.current;
+                    const daily = data.daily;
+
+                    const desc = obterDescricaoClima(current.weather_code);
+
+                    results.innerHTML = `
+                        <div class="success">✅ Previsão encontrada!</div>
+                        <div class="info-cards">
+                            <div class="info-card">
+                                <h3>Temperatura</h3>
+                                <p class="main-value">${current.temperature_2m}°C</p>
+                            </div>
+                            <div class="info-card">
+                                <h3>Condição</h3>
+                                <p class="small-value">${desc}</p>
+                            </div>
+                            <div class="info-card">
+                                <h3>Umidade</h3>
+                                <p class="small-value">${current.relative_humidity_2m}%</p>
+                            </div>
+                            <div class="info-card">
+                                <h3>Vento</h3>
+                                <p class="small-value">${current.wind_speed_10m} km/h</p>
+                            </div>
+                        </div>
+                        <div class="results" style="margin-top: 30px;">
+                            <div class="result-box">
+                                <strong>Temperatura Máxima</strong>
+                                <p>${daily.temperature_2m_max[0]}°C</p>
+                            </div>
+                            <div class="result-box">
+                                <strong>Temperatura Mínima</strong>
+                                <p>${daily.temperature_2m_min[0]}°C</p>
+                            </div>
+                        </div>
+                    `;
+                })
+                .catch(error => {
+                    results.innerHTML = '<div class="error">❌ Erro ao consultar previsão</div>';
+                    console.error('Erro:', error);
+                });
+        }
+
+        function obterDescricaoClima(code) {
+            const desc = {
+                0: '☀️ Céu Limpo',
+                1: '🌤️ Parcialmente Nublado',
+                2: '☁️ Nublado',
+                3: '🌥️ Muito Nublado',
+                45: '🌫️ Nevoeiro',
+                51: '🌧️ Garoa Leve',
+                61: '🌧️ Chuva Leve',
+                63: '🌧️ Chuva Moderada',
+                65: '⛈️ Chuva Forte',
+                71: '❄️ Neve Leve',
+                80: '🌧️ Pancadas de Chuva',
+                95: '⛈️ Tempestade'
+            };
+            return desc[code] || '🌡️ Desconhecido';
+        }
+
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                if (document.getElementById('clubs').classList.contains('active')) {
+                    buscarClubes();
+                } else if (document.getElementById('weather').classList.contains('active')) {
+                    buscarTempo();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
